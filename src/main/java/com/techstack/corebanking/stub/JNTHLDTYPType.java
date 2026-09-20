@@ -1,0 +1,67 @@
+
+package com.techstack.corebanking.stub;
+
+import jakarta.xml.bind.annotation.XmlEnum;
+import jakarta.xml.bind.annotation.XmlType;
+
+
+/**
+ * <p>Java class for JNTHLDTYPType.
+ * 
+ * <p>The following schema fragment specifies the expected content contained within this class.
+ * <pre>
+ * &lt;simpleType name="JNTHLDTYPType"&gt;
+ *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string"&gt;
+ *     &lt;enumeration value="AUS"/&gt;
+ *     &lt;enumeration value="CON"/&gt;
+ *     &lt;enumeration value="CUS"/&gt;
+ *     &lt;enumeration value="DEV"/&gt;
+ *     &lt;enumeration value="GUA"/&gt;
+ *     &lt;enumeration value="GUR"/&gt;
+ *     &lt;enumeration value="JAF"/&gt;
+ *     &lt;enumeration value="JAO"/&gt;
+ *     &lt;enumeration value="JOF"/&gt;
+ *     &lt;enumeration value="JOO"/&gt;
+ *     &lt;enumeration value="NOM"/&gt;
+ *     &lt;enumeration value="REL"/&gt;
+ *     &lt;enumeration value="SOL"/&gt;
+ *     &lt;enumeration value="SOW"/&gt;
+ *     &lt;enumeration value="THR"/&gt;
+ *     &lt;enumeration value="TRU"/&gt;
+ *     &lt;enumeration value="VAL"/&gt;
+ *   &lt;/restriction&gt;
+ * &lt;/simpleType&gt;
+ * </pre>
+ * 
+ */
+@XmlType(name = "JNTHLDTYPType")
+@XmlEnum
+public enum JNTHLDTYPType {
+
+    AUS,
+    CON,
+    CUS,
+    DEV,
+    GUA,
+    GUR,
+    JAF,
+    JAO,
+    JOF,
+    JOO,
+    NOM,
+    REL,
+    SOL,
+    SOW,
+    THR,
+    TRU,
+    VAL;
+
+    public String value() {
+        return name();
+    }
+
+    public static JNTHLDTYPType fromValue(String v) {
+        return valueOf(v);
+    }
+
+}
