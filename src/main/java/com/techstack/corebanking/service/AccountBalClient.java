@@ -1,16 +1,14 @@
 package com.techstack.corebanking.service;
 
-import com.techstack.corebanking.controller.AccountBalController;
 import com.techstack.corebanking.stub.*;
-import com.techstack.corebanking.util.RequestUtil;
-import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.ws.client.core.WebServiceTemplate;
 import com.techstack.corebanking.dto.*;
+import com.techstack.corebanking.util.RequestUtil;
 
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
@@ -22,12 +20,21 @@ public class AccountBalClient {
 	@Autowired
      private Jaxb2Marshaller marshaller ;
 	 private WebServiceTemplate template ;
+	@Autowired
+	private RequestUtil requestUtil;
+
+	@Value("${fcubs.account-service-url}")
+	private static String ACCOUNT_SERVICE_URL;
+
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(AccountBalClient.class);
 
-	public QUERYACCBALIOFSRES InvokeAccountBal (AccountBalanceRequest accountbalancerequest, FCUBSHEADERType fcubsheader) {
+	public QUERYACCBALIOFSRES InvokeAccountBal (AccountBalanceRequest accountbalancerequest) {
 
-		LOGGER.info("Branch code is: {}, Account number is: {}", accountbalancerequest.getBranchCode(), accountbalancerequest.getCustacno());
+		LOGGER.info("Branch code is: {}, Account number i" +
+				"s: {}", accountbalancerequest.getBranchCode(), accountbalancerequest.getCustacno());
+
+		FCUBSHEADERType fcubsheader  =  requestUtil.createHeader();
 
 		QUERYACCBALIOFSREQ fcubsMainHeader = new QUERYACCBALIOFSREQ();
 
@@ -43,21 +50,22 @@ public class AccountBalClient {
 		fcubsMainHeader.setFCUBSBODY(flexbosy);
 
 		template = new WebServiceTemplate(marshaller);
-		QUERYACCBALIOFSRES response = (QUERYACCBALIOFSRES)  template.marshalSendAndReceive("http://10.1.12.71:8101/FCUBSAccService/FCUBSAccService",fcubsMainHeader);
+		QUERYACCBALIOFSRES response = (QUERYACCBALIOFSRES)  template.marshalSendAndReceive(ACCOUNT_SERVICE_URL ,fcubsMainHeader);
 		return response ;
 
 	}
 	
 		/** QUERY ACCOUNT BALANCE **/
-	public QUERYACCBALIOFSRES getCustBal (QUERYACCBALIOFSREQ request, FCUBSHEADERType fcubsheader) {
+	public QUERYACCBALIOFSRES getCustBal (QUERYACCBALIOFSREQ request) {
 		template = new WebServiceTemplate(marshaller);
-		QUERYACCBALIOFSRES response = (QUERYACCBALIOFSRES) template.marshalSendAndReceive("http://10.1.12.71:8101/FCUBSAccService/FCUBSAccService",request);
+		QUERYACCBALIOFSRES response = (QUERYACCBALIOFSRES) template.marshalSendAndReceive(ACCOUNT_SERVICE_URL, request);
 		return response ;
 	}
 	
 	/** QUERY ACCOUNT BALANCE SUMMARY **/
-	public QUERYACCSUMMIOFSRES getCustSummaryBal (AccountNumberRequest accountnumberrequest, FCUBSHEADERType fcubsheader) {
+	public QUERYACCSUMMIOFSRES getCustSummaryBal (AccountNumberRequest accountnumberrequest) {
 		QUERYACCSUMMIOFSREQ fcubsMainHeader = new QUERYACCSUMMIOFSREQ();
+		FCUBSHEADERType fcubsheader  =  requestUtil.createHeader();
 		fcubsheader.setOPERATION("QueryAccSumm");
 
 		fcubsMainHeader.setFCUBSHEADER(fcubsheader);
@@ -70,14 +78,15 @@ public class AccountBalClient {
 		fcubsMainHeader.setFCUBSBODY(flexbosy);
 
 		template = new WebServiceTemplate(marshaller);
-		QUERYACCSUMMIOFSRES response = (QUERYACCSUMMIOFSRES) template.marshalSendAndReceive("http://10.1.12.71:8101/FCUBSAccService/FCUBSAccService",fcubsMainHeader);
+		QUERYACCSUMMIOFSRES response = (QUERYACCSUMMIOFSRES) template.marshalSendAndReceive(ACCOUNT_SERVICE_URL, fcubsMainHeader);
 		return response ;
 	}
 	
 	/** CREATE CUSTOMER ACCOUNT **/
-	public CREATECUSTACCFSFSRES CreateAccount (AccountCreationRequest accountcreationrequest, FCUBSHEADERType fcubsheader) {
+	public CREATECUSTACCFSFSRES CreateAccount (AccountCreationRequest accountcreationrequest) {
 
 		CREATECUSTACCFSFSREQ fcubsMainHeader = new CREATECUSTACCFSFSREQ();
+		FCUBSHEADERType fcubsheader  =  requestUtil.createHeader();
 		fcubsheader.setSOURCE("FCAT");
 		fcubsheader.setOPERATION("CreateCustAcc");
 
@@ -88,42 +97,38 @@ public class AccountBalClient {
 		custacc.setCUSTNO(accountcreationrequest.getCustno());
 		custacc.setCCY(accountcreationrequest.getCcy());
 		custacc.setACCLS(accountcreationrequest.getAccls());
-		System.out.println("Branch sent is :" +accountcreationrequest.getBrn());
-		System.out.println("customer no sent is :" +accountcreationrequest.getCustno());
-		System.out.println("ccy sent is :" +accountcreationrequest.getCcy());
-
-		System.out.println("Account class sent is :" +accountcreationrequest.getAccls());
-		System.out.println("Account sent is :" +accountcreationrequest.getAcc());
-
-
 
 		CREATECUSTACCFSFSREQ.FCUBSBODY flexbosy = new CREATECUSTACCFSFSREQ.FCUBSBODY();
 		flexbosy.setCustAccountFull(custacc);
 		fcubsMainHeader.setFCUBSBODY(flexbosy);
 		template = new WebServiceTemplate(marshaller);
-		CREATECUSTACCFSFSRES response = (CREATECUSTACCFSFSRES) template.marshalSendAndReceive("http://10.1.12.71:8101/FCUBSAccService/FCUBSAccService",fcubsMainHeader);
+		CREATECUSTACCFSFSRES response = (CREATECUSTACCFSFSRES) template.marshalSendAndReceive(ACCOUNT_SERVICE_URL, fcubsMainHeader);
 		return response ;
 	}
 	
 	// full customer balance 
 	
-	public QUERYCUSTACCIOFSRES FullAccBal (AccountNumberRequest accountnumberrequest, FCUBSHEADERType fcubsheader) {
+	public QUERYCUSTACCIOFSRES FullAccBal (AccountNumberRequest accountnumberrequest) {
 
 		QUERYCUSTACCIOFSREQ fcubsMainHeader = new QUERYCUSTACCIOFSREQ();
+		FCUBSHEADERType fcubsheader  =  requestUtil.createHeader();
 		fcubsMainHeader.setFCUBSHEADER(fcubsheader);
+
 		CustAccQueryIOType fullbal =  new CustAccQueryIOType();
 		fullbal.setACC(accountnumberrequest.getCustacno());
 		QUERYCUSTACCIOFSREQ.FCUBSBODY flexbosy = new QUERYCUSTACCIOFSREQ.FCUBSBODY();
 		flexbosy.setCustAccountIO(fullbal);
 		fcubsMainHeader.setFCUBSBODY(flexbosy);
 		template = new WebServiceTemplate(marshaller);
-		QUERYCUSTACCIOFSRES response = (QUERYCUSTACCIOFSRES) template.marshalSendAndReceive("http://10.1.12.71:8101/FCUBSAccService/FCUBSAccService",fcubsMainHeader);
+		QUERYCUSTACCIOFSRES response = (QUERYCUSTACCIOFSRES) template.marshalSendAndReceive(ACCOUNT_SERVICE_URL, fcubsMainHeader);
 		return response ;
 	}
 	/** CREATE CHECK BOOK **/
-	public CREATECHECKBOOKFSFSRES createCheckBook (String BRANCH_CODE ,String account_no, FCUBSHEADERType fcubsheader) {
+	public CREATECHECKBOOKFSFSRES createCheckBook (String BRANCH_CODE ,String account_no) {
 
 		CREATECHECKBOOKFSFSREQ fcubsMainHeader = new CREATECHECKBOOKFSFSREQ();
+
+		FCUBSHEADERType fcubsheader  =  requestUtil.createHeader();
 		fcubsMainHeader.setFCUBSHEADER(fcubsheader);
 		CheckBookFullType checkbook  =  new CheckBookFullType();
 		checkbook.setACCOUNT(account_no);
@@ -135,7 +140,7 @@ public class AccountBalClient {
 		fcubsMainHeader.setFCUBSBODY(flexbosy);
 
 		template = new WebServiceTemplate(marshaller);
-		CREATECHECKBOOKFSFSRES response = (CREATECHECKBOOKFSFSRES)  template.marshalSendAndReceive("http://10.1.12.71:8101/FCUBSAccService/FCUBSAccService",fcubsMainHeader);
+		CREATECHECKBOOKFSFSRES response = (CREATECHECKBOOKFSFSRES)  template.marshalSendAndReceive(ACCOUNT_SERVICE_URL, fcubsMainHeader);
 		return response ;
 	}
 
@@ -143,16 +148,7 @@ public class AccountBalClient {
 	{
 		QUERYCUSTACCOUNTDETAILSIOFSREQ fcubsMainHeader = new QUERYCUSTACCOUNTDETAILSIOFSREQ();
 
-		FCUBSHEADERType fcubsheader = new FCUBSHEADERType();
-		fcubsheader.setSOURCE("FCAT");
-		fcubsheader.setUBSCOMP(UBSCOMPType.FCUBS);
-		fcubsheader.setMSGID("");
-		fcubsheader.setCORRELID(null);
-		fcubsheader.setUSERID("TAKEON02");
-		fcubsheader.setPASSWORD("Oracle@2");
-		fcubsheader.setBRANCH("100");
-		fcubsheader.setMODULEID("");
-		fcubsheader.setSERVICE("FCUBSAccService");
+		FCUBSHEADERType fcubsheader  =  requestUtil.createHeader();
 		fcubsheader.setOPERATION("QuerycustAccountDetails");
 		fcubsMainHeader.setFCUBSHEADER(fcubsheader);
 
@@ -164,7 +160,7 @@ public class AccountBalClient {
 		flexbosy.setCustDetailsIO(accdetails);
 		fcubsMainHeader.setFCUBSBODY(flexbosy);
 		template = new WebServiceTemplate(marshaller);
-		QUERYCUSTACCOUNTDETAILSIOFSRES response = (QUERYCUSTACCOUNTDETAILSIOFSRES)  template.marshalSendAndReceive("http://10.1.12.71:8101/FCUBSAccService/FCUBSAccService",fcubsMainHeader);
+		QUERYCUSTACCOUNTDETAILSIOFSRES response = (QUERYCUSTACCOUNTDETAILSIOFSRES)  template.marshalSendAndReceive(ACCOUNT_SERVICE_URL ,fcubsMainHeader);
 		return response ;
 	}
 
@@ -173,16 +169,7 @@ public class AccountBalClient {
 
 	   QUERYCBSTMTIOFSREQ fcubsMainHeader = new QUERYCBSTMTIOFSREQ();
 
-	   FCUBSHEADERType fcubsheader = new FCUBSHEADERType();
-	   fcubsheader.setSOURCE("FCAT");
-	   fcubsheader.setUBSCOMP(UBSCOMPType.FCUBS);
-	   fcubsheader.setMSGID("");
-	   fcubsheader.setCORRELID(null);
-	   fcubsheader.setUSERID("TAKEON02");
-	   fcubsheader.setPASSWORD("Oracle@2");
-	   fcubsheader.setBRANCH("100");
-	   fcubsheader.setMODULEID("");
-	   fcubsheader.setSERVICE("FCUBSAccService");
+	   FCUBSHEADERType fcubsheader  =  requestUtil.createHeader();
 	   fcubsheader.setOPERATION("QueryCbStmt");
 	   fcubsMainHeader.setFCUBSHEADER(fcubsheader);
 
@@ -194,34 +181,8 @@ public class AccountBalClient {
 	   flexbosy.setMainIO(cbstmtqueryiotype);
 	   fcubsMainHeader.setFCUBSBODY(flexbosy);
 	   template = new WebServiceTemplate(marshaller);
-	   QUERYCBSTMTIOFSRES response = (QUERYCBSTMTIOFSRES)  template.marshalSendAndReceive("http://10.1.12.71:8101/FCUBSAccService/FCUBSAccService",fcubsMainHeader);
+	   QUERYCBSTMTIOFSRES response = (QUERYCBSTMTIOFSRES)  template.marshalSendAndReceive(ACCOUNT_SERVICE_URL, fcubsMainHeader);
 	   return response ;
 
    }
-/**
-   public QUERYACCLASSTFRIOFSRES QueryAcclassn (){
-
-	   QUERYTDCUSTACCIOFSREQ  fcubsMainHeader   = new QUERYTDCUSTACCIOFSREQ();
-
-
-	   FCUBSHEADERType fcubsheader = new FCUBSHEADERType();
-	   fcubsheader.setSOURCE("FCAT");
-	   fcubsheader.setUBSCOMP(UBSCOMPType.FCUBS);
-	   fcubsheader.setMSGID("");
-	   fcubsheader.setCORRELID(null);
-	   fcubsheader.setUSERID("TAKEON02");
-	   fcubsheader.setPASSWORD("Oracle@2");
-	   fcubsheader.setBRANCH("100");
-	   fcubsheader.setMODULEID("");
-	   fcubsheader.setSERVICE("FCUBSAccService");
-	   fcubsheader.setOPERATION("QuerycustAccountDetails");
-	   fcubsMainHeader.setFCUBSHEADER(fcubsheader);
-
-	   CustAccTfrQueryIOType cusaccfr = new CustAccTfrQueryIOType();
-	   ///cusaccfr.
-
-    return QUERYACCLASSTFRIOFSRES;
-   }
-**/
-
 }

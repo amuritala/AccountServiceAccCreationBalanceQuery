@@ -4,7 +4,6 @@ import com.techstack.corebanking.service.AccountBalClient;
 import com.techstack.corebanking.stub.*;
 import com.techstack.corebanking.dto.*;
 
-import com.techstack.corebanking.util.RequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,21 +25,11 @@ public class AccountBalController {
 
 	@PostMapping("/api/vi/bal")
 	public QUERYACCBALIOFSRES invokeAccountBal(
-			@Valid @RequestBody AccountBalanceRequest accountBalanceRequest,
-			@RequestHeader Map<String, String> requestHeaders) {
-
-		FCUBSHEADERType fcubsHeader =
-				RequestUtil.getRequestURL(requestHeaders);
-
-		LOGGER.info(
-				"FCUBS Header initialized with OPERATION: {}",
-				fcubsHeader.getOPERATION()
-		);
+			@Valid @RequestBody AccountBalanceRequest accountBalanceRequest) {
 
 		QUERYACCBALIOFSRES responseMsg =
 				accountBalClient.InvokeAccountBal(
-						accountBalanceRequest,
-						fcubsHeader
+						accountBalanceRequest
 				);
 
 		LOGGER.info(
@@ -53,21 +42,12 @@ public class AccountBalController {
 
 	@PostMapping("/api/v1/Summarybal")
 	public QUERYACCSUMMIOFSRES invokeSummaryBal(
-			@Valid @RequestBody AccountNumberRequest accountNumberRequest,
-			@RequestHeader Map<String, String> requestHeaders) {
+			@Valid @RequestBody AccountNumberRequest accountNumberRequest) {
 
-		FCUBSHEADERType fcubsHeader =
-				RequestUtil.getRequestURL(requestHeaders);
-
-		LOGGER.info(
-				"FCUBS Header initialized with OPERATION: {}",
-				fcubsHeader.getOPERATION()
-		);
 
 		QUERYACCSUMMIOFSRES responseMsg =
 				accountBalClient.getCustSummaryBal(
-						accountNumberRequest,
-						fcubsHeader
+						accountNumberRequest
 				);
 
 		LOGGER.info(
@@ -80,21 +60,11 @@ public class AccountBalController {
 
 	@PostMapping("/api/v1/createAcc")
 	public CREATECUSTACCFSFSRES createAcc(
-			@RequestBody AccountCreationRequest accountCreationRequest,
-			@RequestHeader Map<String, String> requestHeaders) {
-
-		FCUBSHEADERType fcubsHeader =
-				RequestUtil.getRequestURL(requestHeaders);
-
-		LOGGER.info(
-				"FCUBS Header initialized with OPERATION: {}",
-				fcubsHeader.getOPERATION()
-		);
+			@RequestBody AccountCreationRequest accountCreationRequest) {
 
 		CREATECUSTACCFSFSRES responseMsg =
 				accountBalClient.CreateAccount(
-						accountCreationRequest,
-						fcubsHeader
+						accountCreationRequest
 				);
 
 		LOGGER.info(
@@ -107,21 +77,11 @@ public class AccountBalController {
 
 	@PostMapping("/api/v1/fullAccbal")
 	public QUERYCUSTACCIOFSRES fullAccBal(
-			@Valid @RequestBody AccountNumberRequest accountNumberRequest,
-			@RequestHeader Map<String, String> requestHeaders) {
-
-		FCUBSHEADERType fcubsHeader =
-				RequestUtil.getRequestURL(requestHeaders);
-
-		LOGGER.info(
-				"FCUBS Header initialized with OPERATION: {}",
-				fcubsHeader.getOPERATION()
-		);
+			@Valid @RequestBody AccountNumberRequest accountNumberRequest) {
 
 		QUERYCUSTACCIOFSRES responseMsg =
 				accountBalClient.FullAccBal(
-						accountNumberRequest,
-						fcubsHeader
+						accountNumberRequest
 				);
 
 		LOGGER.info(
@@ -135,22 +95,12 @@ public class AccountBalController {
 	@PostMapping("/api/v1/checkbook")
 	public CREATECHECKBOOKFSFSRES checkBook(
 			@RequestParam("BRANCH_CODE") String branchCode,
-			@RequestParam("account_no") String accountNo,
-			@RequestHeader Map<String, String> requestHeaders) {
-
-		FCUBSHEADERType fcubsHeader =
-				RequestUtil.getRequestURL(requestHeaders);
-
-		LOGGER.info(
-				"FCUBS Header initialized with OPERATION: {}",
-				fcubsHeader.getOPERATION()
-		);
+			@RequestParam("account_no") String accountNo) {
 
 		CREATECHECKBOOKFSFSRES responseMsg =
 				accountBalClient.createCheckBook(
 						branchCode,
-						accountNo,
-						fcubsHeader
+						accountNo
 				);
 
 		LOGGER.info(
@@ -164,7 +114,6 @@ public class AccountBalController {
 	@PostMapping("/api/v1/AccDetails")
 	public QUERYCUSTACCOUNTDETAILSIOFSRES AccDetails (@Valid @RequestBody QueryCustAccDetailRequest querycustaccdetailrequest) {
 		QUERYCUSTACCOUNTDETAILSIOFSRES responseMsg =  accountBalClient.QueryCustAccDetail(querycustaccdetailrequest) ;
-		System.out.println(""+responseMsg.getFCUBSBODY());
 		return responseMsg;
 
 	}
@@ -172,7 +121,6 @@ public class AccountBalController {
 	@PostMapping("/api/v1/Statement")
 	public QUERYCBSTMTIOFSRES AccDetails (@Valid @RequestBody QueryCbStmtRequest querycbstmtrequest) {
 		QUERYCBSTMTIOFSRES responseMsg =  accountBalClient.QuerryCbStmt(querycbstmtrequest) ;
-		System.out.println(""+responseMsg.getFCUBSBODY());
 		return responseMsg;
 
 	}
